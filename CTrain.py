@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.integrate import quad
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 ### metric conversion constants ###
 LB_TO_KG = 0.45359237
 HP_TO_W = 745.699872
@@ -11,13 +14,14 @@ IN_TO_M = 0.0254
 
 ### braking performance params ###
 ### use default constants for now ###
+### using constants 2.1.5 ###
 '''
 BRAKE_A1 = deceleration rate (m/s^2) from BRAKE_V1 (m/s) down to 0
 BRAKE_A2 = deceleration rate for v above BRAKE_V1
 '''
-BRAKE_A1 = 1.35 * MPH_TO_M_S
-BRAKE_A2 = 2 * MPH_TO_M_S
-BRAKE_V1 = 125 * MPH_TO_M_S
+BRAKE_A1 = 2 * MPH_TO_M_S
+BRAKE_A2 = 1.35 * MPH_TO_M_S
+BRAKE_V1 = 70 * MPH_TO_M_S
 
 ### helpers to print dual units, given metric ###
 def mass_units_str(m):
@@ -110,7 +114,7 @@ class Train():
       t_final = self.m * v / self.F
     else:
       # implements equation 1.3.2
-      numer = self.m * (v**2 - self.v_1)
+      numer = self.m * (v**2 - (self.v_1 ** 2))
       denom = 2 * (self.P - (self.D * v**3))
       if denom < 0:
         return -1
@@ -132,7 +136,7 @@ class Train():
       # implements equation 1.3.3
       a = 2 * self.D * (t - self.t_1)
       b = self.m
-      c = (2 * self.P * (self.t_1 - t)) - (self.m * self.v_1)
+      c = (2 * self.P * (self.t_1 - t)) - (self.m * (self.v_1 ** 2))
       p = [a, b, 0, c]
       roots = np.roots(p)
       # required to extract real solution
@@ -166,6 +170,29 @@ class Train():
       t_final = (v - BRAKE_V1) * (1 / BRAKE_A2) + BRAKE_V1 * (1 / BRAKE_A1)
     return t_final
 
+  def calc_brake_vel(self, t, v_mph):
+    '''
+    Returns the velocity after t s of braking from v_mph
+    '''
+    assert all([t >= 0, v_mph >= 0]), \
+      "The following args must be nonnegative: t, v_mph"
+
+    v = v_mph * MPH_TO_M_S
+    
+    if v < BRAKE_V1:
+      # implements equation 2.1.3
+      vel_final = max(0, v - BRAKE_A1 * t)
+    else:
+      # implements equation 2.1.4
+      t_1 = (v - BRAKE_V1) / BRAKE_A2
+      
+      if t < t_1:
+        vel_final = v - (BRAKE_A2 * t)
+      else:
+        vel_final = max(0, BRAKE_V1 - (BRAKE_A1 * (t - t_1))) 
+
+    return vel_final
+  
   def calc_brake_dist(self, v_mph):
     '''Returns the dist required to brake to a stop from v_mph'''
     assert v_mph >= 0, \
@@ -185,6 +212,7 @@ class Train():
   def stop_to_stop_time(self, d_tot_mi, v_max_mph, t_dwell=60):
     '''
     Returns the total arrival-to-arrival travel time from one stop to the next
+    Returns -1 if travel time cannot be calculated
     d_mi = track distance between the two stops
     vmax_mph = practical top track speed
     t_dwell (optional) = dwell time at first stop
@@ -198,11 +226,16 @@ class Train():
     d_tot = d_tot_mi * MI_TO_M
 
     t_acc = self.calc_accel_time(v_max_mph)
+    # v_max_mph error case
+    if t_acc == -1:
+        print("Error: v_max_mph is unrealistic; speed is not reachable! Travel time cannot be calculated! Check params and their units!")
+        return -1
     d_acc = self.calc_accel_dist(t_acc)
     t_brake = self.calc_brake_time(v_max_mph)
     d_brake = self.calc_brake_dist(v_max_mph)
 
     #implements algorithm 3.3.2
+    i = 0
     while not (d_acc + d_brake <= d_tot):
       print(f"{dist_units_str(d_tot)} is insufficient to accelerate to and brake from {vel_units_str(v_max)}! Lowering v_max by 0.5%")
       v_max_mph =  v_max_mph * 0.995
@@ -212,6 +245,12 @@ class Train():
       d_acc = self.calc_accel_dist(t_acc)
       t_brake = self.calc_brake_time(v_max_mph)
       d_brake = self.calc_brake_dist(v_max_mph)
+
+      # d_tot_mi error case
+      if i > 100:
+        print("Error: d_tot_mi is unrealistic; distance is much too short vs. acceleration/deceleration time needed! Travel time cannot be calculated! Check params and their units!")
+        return -1
+      i += 1
 
     print(f"Returning stop-to-stop travel time: distance {dist_units_str(d_tot)}, practical top speed {vel_units_str(v_max)}, dwell time {t_dwell} s")
     #implements equation 3.1.1
@@ -224,7 +263,46 @@ class Train():
     
     return t_total
 
-  def show_accel_curve(self):
-    '''Displays a graph of v as a function of t'''
-    #TODO
-    pass
+  def plot_vel_curve(self, v_max_mph, accel=True):
+    '''accel=True: Displays a plot of v (acceleration up to v_max_mph) as a function of t'''
+    '''accel=False: Displays a plot of v (braking down from v_max_mph) as a function of t'''
+    assert v_max_mph > 0, \
+      "The following args must be positive: v_max_mph"
+
+    if accel:
+      t_max = self.calc_accel_time(v_max_mph)
+      # get v vs t at 1000 evenly-distributed points
+      x_t = np.linspace(0, t_max, 1000)
+      y_v = np.array([self.calc_accel_vel(t) for t in x_t])
+      title = "Acceleration"
+    else:
+      t_max = self.calc_brake_time(v_max_mph)
+      x_t = np.linspace(0, t_max, 1000)
+      y_v = np.array([self.calc_brake_vel(t, v_max_mph) for t in x_t])
+      title = "Braking"
+
+    # convert speeds back to mph
+    y_v = y_v / MPH_TO_M_S
+
+    fig, ax = plt.subplots()
+    # show v ticks every 5 mph
+    ax.set_yticks([i for i in range(0, int(np.ceil(v_max_mph)) + 6, 5)])
+
+    # t granularity to show at most 20 ticks
+    if t_max <= 20: t_gran = 1
+    elif t_max < 40: t_gran = 2
+    elif t_max < 100: t_gran = 5
+    elif t_max < 200: t_gran = 10
+    elif t_max < 300: t_gran = 15
+    elif t_max < 400: t_gran = 20
+    else: t_gran = 30
+
+    ax.set_xticks([i for i in range(0, int(np.ceil(t_max)) + t_gran + 1, t_gran)])
+    
+    
+    plt.plot(x_t, y_v)
+    plt.grid(linestyle = 'dotted')
+    plt.title(title)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Speed (mph)')
+    plt.show()
