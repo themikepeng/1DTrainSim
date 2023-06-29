@@ -4,7 +4,7 @@ if __name__ == "__main__":
     D = calc_D(h_in=15*12+7.5, w_in=10*12+3, C_d=0.8)
     print(f"combined coefficient of drag: {D}")
     
-    train = Train(m_lb=1030000, P_hp=3900, F_lbf=50000, D=D)
+    train = Train(m_lb=1172000.0, P_hp=3900, F_lbf=65000.0, D=D)
     
     # edge test cases
     # expect no errors

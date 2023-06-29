@@ -208,7 +208,7 @@ class Train():
     return vel_final
   
   def calc_brake_dist(self, v_mph):
-    '''Returns the dist required to brake to a stop from v_mph (mph => m/s)'''
+    '''Returns the dist (m) required to brake to a stop from v_mph (mph => m/s)'''
     assert v_mph >= 0, \
       "The following args must be nonnegative: v_mph"
     v = v_mph * MPH_TO_M_S
