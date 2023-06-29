@@ -2,7 +2,7 @@
 ## Problem Statement
 
 
-1.   Given performance specs and dimensions of a train, how much **time** and **distance** will it take to accelerate? To Brake?
+1.   Given performance specs and dimensions of a train, how much **time** and **distance** does it require to accelerate? To Brake?
 2.   Given the distance between two consecutive stops, how much **time** is required between arrivals (factoring in track speed, acceleration, and braking)?
 3.   How can the simulation be extended to obtain a **reasonable timetable** for an entire route?
 
