@@ -9,19 +9,19 @@
 ## 1DTrainSim Features
 1.   Given performance specs and dimensions of a train consist, initializes a simulated **Train**
 
-    a. The **Train** then provides functions to calculate relations between **time, distance, and speed** during acceleration or braking
+        a. The **Train** then provides functions to calculate relations between **time, distance, and speed** during acceleration or braking
 
-    b. Visualization: to show acceleration and braking performance curves, plot **speed** vs **time**
+       b. Visualization: to show acceleration and braking performance curves, plot **speed** vs **time**
 
 2.   Finds **Train's arrival-to-arrival time** between stops
     
-    a. By combining **time** calculations for acceleration, deceleration, (constant) track speed, and stop dwell time
+        a. By combining **time** calculations for acceleration, deceleration, (constant) track speed, and stop dwell time
 
 3.   Includes wrapper script to generate a **timetable file**
 
-    a. Wrapper takes in and parses **train file** and **route file**, then performs necessary calculations
+        a. Wrapper takes in and parses **train file** and **route file**, then performs necessary calculations
     
-    b. See respective sections for file definitions
+       b. See respective sections for file definitions
 
 ## Prerequisites
 *   Python3 environment with standard libraries
@@ -42,78 +42,79 @@ Refer to ***CTrain.py*** docstrings for each function's, parameters, output, and
 
 Refer to ***demo.py*** for a full example flow
 1. Calculate combined coefficient of drag (optional; only if enabling drag calculations)
-```
-D = calc_D(h_in, w_in, rho=1.2041, C_d=1)
-```
+	```
+	D = calc_D(h_in, w_in, rho=1.2041, C_d=1)
+	```
 2. Initialize a **Train**
 
-  Using default braking params:
+	Using default braking params:
 
-  ```
-  train = Train(m_lb, P_hp, F_lbf, D=0)
-  ```
+	```
+	train = Train(m_lb, P_hp, F_lbf, D=0)
+	```
 
-  Using custom braking params:
+	Using custom braking params:
 
-  ```
-  train = Train(m_lb, \
-  P_hp, \
-  F_lbf, \
-  brake_a1_mphps=2.0, \
-  brake_a2_mphps=1.35, \
-  brake_v1_mph=70, \
-  D=D)
-  ```
-  Can also load consist from .json file (see later section for file format)
+	```
+	train = Train(m_lb, \
+	P_hp, \
+	F_lbf, \
+	brake_a1_mphps=2.0, \
+	brake_a2_mphps=1.35, \
+	brake_v1_mph=70, \
+	D=D)
+	```
+	Can also load consist from .json file (see later section for file format)
 
-  ```
-  train = load_train("sample_train_A.json")
-  ```
+	```
+	train = load_train("sample_train_A.json")
+	```
 
 ### Train can now perform any of the following
 
 3. Plot acceleration or braking curve
-```
-train.plot_vel_curve(v_max_mph, accel=True)
-train.plot_vel_curve(v_max_mph, accel=False)
-```
-![alt text](accel_eg.png "Example Accleration Plot")
+	```
+	train.plot_vel_curve(v_max_mph, accel=True)
+	train.plot_vel_curve(v_max_mph, accel=False)
+	```
+	See example plot: **accel_eg.png**
 
 4. Calculate relations between **time, distance, and speed** during acceleration or braking, using any of the following
-```
-train.calc_accel_time(v_mph)
-train.calc_accel_vel(t)
-train.calc_accel_dist(t)
-train.calc_brake_time(v_mph)
-train.calc_brake_vel(t, v_mph)
-train.calc_brake_dist(v_mph)
-```
+	```
+	train.calc_accel_time(v_mph)
+	train.calc_accel_vel(t)
+	train.calc_accel_dist(t)
+	train.calc_brake_time(v_mph)
+	train.calc_brake_vel(t, v_mph)
+	train.calc_brake_dist(v_mph)
+	```
 5. Calculate arrival-to-arrival travel **time** from one stop to the next
-```
-train.stop_to_stop_time(d_tot_mi, v_max_mph, t_dwell=120)
-```
+	```
+	train.stop_to_stop_time(d_tot_mi, v_max_mph, t_dwell=120)
+	```
 
 ## CLI usage: create timetable from user-defined train and route files
 
 1.   Define **train** .json file and **route** .csv file (see sections for format)
 2.   Pass files into wrapper script: ***timetable.py***
 
-    a. Dwell/buffer time is optional
-```
-usage: timetable.py [-h] -t TRAINFILE -r ROUTEFILE [-d DWELLTIME]
-optional arguments:
-  -h, --help            show this help message and exit
-  -t TRAINFILE, --trainfile TRAINFILE
-                        .json file representing a train consist
-  -r ROUTEFILE, --routefile ROUTEFILE
-                        .csv file representing a route
-  -d DWELLTIME, --dwelltime DWELLTIME
-                        (optional) dwell/buffer time at each stop in seconds
-```
-eg.
-```
-timetable.py -t sample_train_A.json -r sample_route_A.csv -d 120
-```
+		a. Dwell/buffer time is optional
+	
+		```
+		usage: timetable.py [-h] -t TRAINFILE -r ROUTEFILE [-d DWELLTIME]
+		optional arguments:
+		  -h, --help            show this help message and exit
+		  -t TRAINFILE, --trainfile TRAINFILE
+								.json file representing a train consist
+		  -r ROUTEFILE, --routefile ROUTEFILE
+								.csv file representing a route
+		  -d DWELLTIME, --dwelltime DWELLTIME
+								(optional) dwell/buffer time at each stop in seconds
+		```
+		eg.
+		```
+		timetable.py -t sample_train_A.json -r sample_route_A.csv -d 120
+		```
 3.   Wrapper will create **timetable** .csv file (see sections for format)
 
 ### Train .json file format
@@ -143,7 +144,7 @@ Params defined at the unit level:
 *   "Height"
 *   "Width"
 
-**Note**: **Train** initialization is done at the train level; params defined at the unit level will be aggregated from the .json
+**Note**: **Train** initialization is done at the train level; params defined at the unit level in .json will be aggregated
 
 ### Route .csv file format
 
