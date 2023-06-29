@@ -7,7 +7,7 @@
 3.   How can the simulation be extended to obtain a **reasonable timetable** for an entire route?
 
 ## 1DTrainSim Features
-1.   Given performance specs and dimensions of a train consist, initializes a simulated **Train**
+1.   Simulated **Train**, given performance specs and dimensions of a train consist
 
         a. The **Train** then provides functions to calculate relations between **time, distance, and speed** during acceleration or braking
 
@@ -27,15 +27,15 @@
 *   Python3 environment with standard libraries
 *   Import statements
 
-```
-from CTrain import *
-from timetable import *
-```
+	```
+	from CTrain import *
+	from timetable import *
+	```
 
 ## Note about units
 Function inputs are in US units, while outputs are in metric units
 
-Helper constants/functions are provided to convert/print back and forth
+Helper constants/functions are provided for converting/printing back and forth
 
 ## API usage: standalone calculations
 Refer to ***CTrain.py*** docstrings for each function's, parameters, output, and unit conversions
@@ -57,12 +57,12 @@ Refer to ***demo.py*** for a full example flow
 
 	```
 	train = Train(m_lb, \
-	P_hp, \
-	F_lbf, \
-	brake_a1_mphps=2.0, \
-	brake_a2_mphps=1.35, \
-	brake_v1_mph=70, \
-	D=D)
+			P_hp, \
+			F_lbf, \
+			brake_a1_mphps=2.0, \
+			brake_a2_mphps=1.35, \
+			brake_v1_mph=70, \
+			D=D)
 	```
 	Can also load consist from .json file (see later section for file format)
 
@@ -77,7 +77,7 @@ Refer to ***demo.py*** for a full example flow
 	train.plot_vel_curve(v_max_mph, accel=True)
 	train.plot_vel_curve(v_max_mph, accel=False)
 	```
-	See example plot: **accel_eg.png**
+	See example plot: ***accel_eg.png***
 
 4. Calculate relations between **time, distance, and speed** during acceleration or braking, using any of the following
 	```
@@ -123,7 +123,7 @@ See sample file: ***sample_train_A.json***
 
 A **train** file defines the train consist to run
 
-*   A train consists of two types of units:
+A train consists of two types of rolling stock units:
 *   "PowerUnits" = locomotives or multiple units, defined by dimensions and performance
 *   "TrailerCars" = non-powered cars, defined by dimensions
 
@@ -166,7 +166,7 @@ By definition, with the exception of loop routes, the initial stop's **track spe
 
 ### Timetable .csv file format
 
-A **timetable** file has format to a **route** file, but with additional columns:
+A **timetable** file has similar format to a **route** file, but with additional columns:
 
 *   **time (min)** = time between arriving previous stop, and arriving current stop (dwell time at previous stop + time to traverse preceeding track section)
 *   **avg spd (mph)** = average speed over **time (min)**
