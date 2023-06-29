@@ -7,7 +7,7 @@
 3.   How can the simulation be extended to obtain a **reasonable timetable** for an entire route?
 
 ## 1DTrainSim Features
-1.   Simulated **Train**, given performance specs and dimensions of a train consist
+1.   Simulates a **Train**, given performance specs and dimensions of a train consist
 
         a. The **Train** then provides functions to calculate relations between **time, distance, and speed** during acceleration or braking
 
@@ -38,7 +38,7 @@ Function inputs are in US units, while outputs are in metric units
 Helper constants/functions are provided for converting/printing back and forth
 
 ## API usage: standalone calculations
-Refer to ***CTrain.py*** docstrings for each function's, parameters, output, and unit conversions
+Refer to function dosctrings in ***CTrain.py*** for parameters, output, and unit conversions
 
 Refer to ***demo.py*** for a full example flow
 1. Calculate combined coefficient of drag (optional; only if enabling drag calculations)
@@ -77,7 +77,7 @@ Refer to ***demo.py*** for a full example flow
 	train.plot_vel_curve(v_max_mph, accel=True)
 	train.plot_vel_curve(v_max_mph, accel=False)
 	```
-	See example plot: ***accel_eg.png***
+	See example plot: ***accel_plot_eg.png***
 
 4. Calculate relations between **time, distance, and speed** during acceleration or braking, using any of the following
 	```
@@ -95,27 +95,26 @@ Refer to ***demo.py*** for a full example flow
 
 ## CLI usage: create timetable from user-defined train and route files
 
-1.   Define **train** .json file and **route** .csv file (see sections for format)
-2.   Pass files into wrapper script: ***timetable.py***
-
-		a. Dwell/buffer time is optional
+1.  Define **train** .json file and **route** .csv file (see sections for format)
+2.  Pass files into wrapper script: ***timetable.py***
+	```
+	usage: timetable.py [-h] -t TRAINFILE -r ROUTEFILE [-d DWELLTIME]
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  -t TRAINFILE, --trainfile TRAINFILE
+							.json file representing a train consist
+	  -r ROUTEFILE, --routefile ROUTEFILE
+							.csv file representing a route
+	  -d DWELLTIME, --dwelltime DWELLTIME
+							(optional) dwell/buffer time at each stop in seconds
+	```
 	
-		```
-		usage: timetable.py [-h] -t TRAINFILE -r ROUTEFILE [-d DWELLTIME]
-		optional arguments:
-		  -h, --help            show this help message and exit
-		  -t TRAINFILE, --trainfile TRAINFILE
-								.json file representing a train consist
-		  -r ROUTEFILE, --routefile ROUTEFILE
-								.csv file representing a route
-		  -d DWELLTIME, --dwelltime DWELLTIME
-								(optional) dwell/buffer time at each stop in seconds
-		```
-		eg.
-		```
-		timetable.py -t sample_train_A.json -r sample_route_A.csv -d 120
-		```
-3.   Wrapper will create **timetable** .csv file (see sections for format)
+	eg.
+
+	```
+	timetable.py -t sample_train_A.json -r sample_route_A.csv -d 120
+	```
+3.  Wrapper will create **timetable** .csv file (see sections for format)
 
 ### Train .json file format
 
@@ -137,7 +136,7 @@ Params defined at the (entire) train level:
 Params defined at the unit level:
 
 *   "Class"
-*   "Config" ("TrailerCars" only)
+*   "Subclass"
 *   "Mass"
 *   "TractionPower" ("PowerUnits" only)
 *   "TractionForce" ("PowerUnits" only)

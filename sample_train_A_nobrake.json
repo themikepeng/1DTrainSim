@@ -3,7 +3,8 @@
 	"LeadingCoefDrag": 0.8,
 	"PowerUnits": [
 		{
-			"Class": "Siemens SC-44",
+			"Class": "Siemens Charger",
+			"Subclass": "SC-44",
 			"Mass": 267000,
 			"TractionPower": 3900,
 			"TractionForce": 65000,
@@ -14,42 +15,42 @@
 	"TrailerCars": [
 		{
 			"Class": "Surfliner",
-			"Config": "Business Class",
+			"Subclass": "Business Class",
 			"Mass": 150000,
 			"Height": 194,
 			"Width": 122
 		},
 		{
 			"Class": "Superliner I",
-			"Config": "Coach",
+			"Subclass": "Coach",
 			"Mass": 148000,
 			"Height": 194,
 			"Width": 122
 		},
 		{
 			"Class": "Surfliner",
-			"Config": "Cafe Coach",
+			"Subclass": "Cafe Coach",
 			"Mass": 153000,
 			"Height": 194,
 			"Width": 122
 		},
 		{
 			"Class": "Surfliner",
-			"Config": "Coach",
+			"Subclass": "Coach",
 			"Mass": 150000,
 			"Height": 194,
 			"Width": 122
 		},
 		{
 			"Class": "Surfliner",
-			"Config": "Coach",
+			"Subclass": "Coach",
 			"Mass": 150000,
 			"Height": 194,
 			"Width": 122
 		},
 		{
 			"Class": "Surfliner",
-			"Config": "Coach Baggage Cab",
+			"Subclass": "Coach Baggage Cab",
 			"Mass": 154000,
 			"Height": 194,
 			"Width": 122
