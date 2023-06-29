@@ -12,16 +12,12 @@ MPH_TO_M_S = 0.44704
 MI_TO_M = 1609.344
 IN_TO_M = 0.0254
 
-### braking performance params ###
-### use default constants for now ###
+### braking performance params (explained under class Train()) ###
+### define default constants here ###
 ### using constants 2.1.5 ###
-'''
-BRAKE_A1 = deceleration rate (m/s^2) from BRAKE_V1 (m/s) down to 0
-BRAKE_A2 = deceleration rate for v above BRAKE_V1
-'''
-BRAKE_A1 = 2 * MPH_TO_M_S
-BRAKE_A2 = 1.35 * MPH_TO_M_S
-BRAKE_V1 = 70 * MPH_TO_M_S
+BRAKE_A1_MPHPS = 2.0
+BRAKE_A2_MPHPS = 1.35
+BRAKE_V1_MPH = 70
 
 ### helpers to print dual units, given metric ###
 def mass_units_str(m):
@@ -43,11 +39,12 @@ def t_round_str(t):
   return str(round(t, 2)) + " s"
 
 ### helpers ###
-def calc_D(h_in, w_in, rho = 1.2041, C_d = 1):
+def calc_D(h_in, w_in, rho=1.2041, C_d=1):
   '''
   args:
-  h = max cross-section height (in)
-  w = max cross-section width (in)
+  h_in = max cross-section height (in => m)
+  w_in = max cross-section width (in => m)
+  rho = air density
   C_d = coefficient of drag
 
   returns:
@@ -72,12 +69,24 @@ def calc_avg_vel(d, t):
 
 
 class Train():
-  def __init__(self, m_lb, P_hp, F_lbf, D=0.77):
+  def __init__(self,
+               m_lb,
+               P_hp,
+               F_lbf,
+               brake_a1_mphps=BRAKE_A1_MPHPS,
+               brake_a2_mphps=BRAKE_A2_MPHPS,
+               brake_v1_mph=BRAKE_V1_MPH,
+               D=0):
     '''
     Initialize a Train from args:
-    m_lb = mass of train (lb)
-    P = traction power (hp)
-    F_lbf = max tractive effort (lbf)
+    m_lb = mass of train (lb => kg)
+    P_hp = traction power (hp => W)
+    F_lbf = max tractive effort (lbf => N)
+    
+    brake_a1_mphps = deceleration rate (mphps => m/s^2) for v from brake_v1_mph down to 0
+    brake_a2_mphps = deceleration rate (mphps => m/s^2) for v above brake_v1_mph
+    brake_v1_mph (mph => m/s)
+    
     D = combined coefficient of drag (optional)
     '''
     assert all([m_lb > 0, P_hp > 0, F_lbf > 0]), \
@@ -88,14 +97,21 @@ class Train():
     self.m = m_lb * LB_TO_KG
     self.P = P_hp * HP_TO_W
     self.F = F_lbf * LBF_TO_N
+    
+    self.brake_a1 = brake_a1_mphps * MPH_TO_M_S
+    self.brake_a2 = brake_a2_mphps * MPH_TO_M_S
+    self.brake_v1 = brake_v1_mph * MPH_TO_M_S
+    
     self.D = D
     print(f"Initializing train with weight {mass_units_str(self.m)}, power {power_units_str(self.P)}, tractive force {force_units_str(self.F)}")
+    print(f"And braking performance: BRAKE_A1 {vel_units_str(self.brake_a1)} (mphps), BRAKE_A2 {vel_units_str(self.brake_a2)} (mphps), BRAKE_V1 {vel_units_str(self.brake_v1)}")
+    print(f"And combined coefficient of drag {self.D}")
     self.calc_power_limit()
 
   def calc_power_limit(self):
     '''
-    Calculate v_1, the highest v where full F can be applied
-    and t_1, the time to accelerate to v_1
+    Calculate v_1 (m/s), the highest v where full F (N) can be applied
+    and t_1 (s), the time to accelerate to v_1
     '''
     # implements equation 1.1.1
     self.v_1 = self.P/self.F
@@ -104,7 +120,7 @@ class Train():
     print(f"Traction limited by power above {vel_units_str(self.v_1)}, after {t_round_str(self.t_1)}")
 
   def calc_accel_time(self, v_mph):
-    '''Returns the time required to reach v_mph, -1 if unable'''
+    '''Returns the time required to reach v_mph (mph => m/s), -1 if unable'''
     assert v_mph >= 0, \
       "The following args must be nonnegative: v_mph"
     v = v_mph * MPH_TO_M_S
@@ -123,7 +139,7 @@ class Train():
 
   def calc_accel_vel(self, t):
     '''
-    Returns the velocity after t s of acceleration
+    Returns the v (m/s) after t (s) of acceleration
     by solving for v in equation of form av^3 + bv^2 + c = 0
     '''
     assert t >= 0, \
@@ -145,7 +161,7 @@ class Train():
 
   def calc_accel_dist(self, t):
     '''
-    Returns the dist traveled after t s of acceleration
+    Returns the dist (m) traveled after t (s) of acceleration
     by integrating v(t)dt over [0, t]
     '''
     assert t > 0, \
@@ -158,64 +174,62 @@ class Train():
     return res
 
   def calc_brake_time(self, v_mph):
-    '''Returns the time required to brake to a stop from v_mph'''
+    '''Returns the time (s) required to brake to a stop from v_mph (mph => m/s)'''
     assert v_mph >= 0, \
       "The following args must be nonnegative: v_mph"
     
     # implements equation 2.1.1
     v = v_mph * MPH_TO_M_S
-    if v < BRAKE_V1:
-      t_final = v * (1 / BRAKE_A1)
+    if v < self.brake_v1:
+      t_final = v * (1 / self.brake_a1)
     else:
-      t_final = (v - BRAKE_V1) * (1 / BRAKE_A2) + BRAKE_V1 * (1 / BRAKE_A1)
+      t_final = (v - self.brake_v1) * (1 / self.brake_a2) + self.brake_v1 * (1 / self.brake_a1)
     return t_final
 
   def calc_brake_vel(self, t, v_mph):
-    '''
-    Returns the velocity after t s of braking from v_mph
-    '''
+    '''Returns the velocity (m/s) after t (s) of braking from v_mph (mph => m/s)'''
     assert all([t >= 0, v_mph >= 0]), \
       "The following args must be nonnegative: t, v_mph"
 
     v = v_mph * MPH_TO_M_S
     
-    if v < BRAKE_V1:
+    if v < self.brake_v1:
       # implements equation 2.1.3
-      vel_final = max(0, v - BRAKE_A1 * t)
+      vel_final = max(0, v - self.brake_a1 * t)
     else:
       # implements equation 2.1.4
-      t_1 = (v - BRAKE_V1) / BRAKE_A2
+      t_1 = (v - self.brake_v1) / self.brake_a2
       
       if t < t_1:
-        vel_final = v - (BRAKE_A2 * t)
+        vel_final = v - (self.brake_a2 * t)
       else:
-        vel_final = max(0, BRAKE_V1 - (BRAKE_A1 * (t - t_1))) 
+        vel_final = max(0, self.brake_v1 - (self.brake_a1 * (t - t_1))) 
 
     return vel_final
   
   def calc_brake_dist(self, v_mph):
-    '''Returns the dist required to brake to a stop from v_mph'''
+    '''Returns the dist required to brake to a stop from v_mph (mph => m/s)'''
     assert v_mph >= 0, \
       "The following args must be nonnegative: v_mph"
     v = v_mph * MPH_TO_M_S
 
     # implements equation 2.1.2
-    if v < BRAKE_V1:
-      d_final = 0.5 * (v ** 2) / BRAKE_A1
+    if v < self.brake_v1:
+      d_final = 0.5 * (v ** 2) / self.brake_a1
     else:
-      add1 = BRAKE_V1 * (v - BRAKE_V1) * (1 / BRAKE_A2)
-      add2 = 0.5 * ((v - BRAKE_V1) ** 2) / BRAKE_A2
-      add3 = 0.5 * (BRAKE_V1 ** 2) / BRAKE_A1
+      add1 = self.brake_v1 * (v - self.brake_v1) * (1 / self.brake_a2)
+      add2 = 0.5 * ((v - self.brake_v1) ** 2) / self.brake_a2
+      add3 = 0.5 * (self.brake_v1 ** 2) / self.brake_a1
       d_final = add1 + add2 + add3
     return d_final
 
-  def stop_to_stop_time(self, d_tot_mi, v_max_mph, t_dwell=60):
+  def stop_to_stop_time(self, d_tot_mi, v_max_mph, t_dwell=120):
     '''
-    Returns the total arrival-to-arrival travel time from one stop to the next
+    Returns the total arrival-to-arrival travel time (s) from one stop to the next
     Returns -1 if travel time cannot be calculated
-    d_mi = track distance between the two stops
-    vmax_mph = practical top track speed
-    t_dwell (optional) = dwell time at first stop
+    d_mi = track distance between the two stops (mi => m)
+    vmax_mph = practical top track speed (mph => m/s)
+    t_dwell (optional) = dwell/buffer time at first stop (s)
     '''
     assert all([d_tot_mi > 0, v_max_mph > 0]), \
       "The following args must be positive: d_tot_mi, v_max_mph"
@@ -251,8 +265,7 @@ class Train():
         print("Error: d_tot_mi is unrealistic; distance is much too short vs. acceleration/deceleration time needed! Travel time cannot be calculated! Check params and their units!")
         return -1
       i += 1
-
-    print(f"Returning stop-to-stop travel time: distance {dist_units_str(d_tot)}, practical top speed {vel_units_str(v_max)}, dwell time {t_dwell} s")
+    
     #implements equation 3.1.1
     d_vmax = d_tot - d_acc - d_brake
     #implements equation 3.1.2
@@ -261,11 +274,12 @@ class Train():
     #implements equation 3.2.1
     t_total = t_dwell + t_acc + t_vmax + t_brake
     
+    print(f"Returning stop-to-stop travel time: distance {dist_units_str(d_tot)}, practical top speed {vel_units_str(v_max)}, dwell/buffer time {t_dwell} s")
     return t_total
 
   def plot_vel_curve(self, v_max_mph, accel=True):
-    '''accel=True: Displays a plot of v (acceleration up to v_max_mph) as a function of t'''
-    '''accel=False: Displays a plot of v (braking down from v_max_mph) as a function of t'''
+    '''accel=True: Displays a plot of v (acceleration up to v_max_mph) as a function of t (s)'''
+    '''accel=False: Displays a plot of v (braking down from v_max_mph) as a function of t (s)'''
     assert v_max_mph > 0, \
       "The following args must be positive: v_max_mph"
 
@@ -288,7 +302,7 @@ class Train():
     # show v ticks every 5 mph
     ax.set_yticks([i for i in range(0, int(np.ceil(v_max_mph)) + 6, 5)])
 
-    # t granularity to show at most 20 ticks
+    # t granularity to show at most 20 ticks (for t < 600)
     if t_max <= 20: t_gran = 1
     elif t_max < 40: t_gran = 2
     elif t_max < 100: t_gran = 5
@@ -298,7 +312,6 @@ class Train():
     else: t_gran = 30
 
     ax.set_xticks([i for i in range(0, int(np.ceil(t_max)) + t_gran + 1, t_gran)])
-    
     
     plt.plot(x_t, y_v)
     plt.grid(linestyle = 'dotted')

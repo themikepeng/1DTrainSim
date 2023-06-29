@@ -1,0 +1,58 @@
+{
+	"Name": "Amtrak Surfliner 6-car",
+	"LeadingCoefDrag": 0.8,
+	"PowerUnits": [
+		{
+			"Class": "Siemens SC-44",
+			"Mass": 267000,
+			"TractionPower": 3900,
+			"TractionForce": 65000,
+			"Height": 176.378,
+			"Width": 120
+		}
+	],
+	"TrailerCars": [
+		{
+			"Class": "Surfliner",
+			"Config": "Business Class",
+			"Mass": 150000,
+			"Height": 194,
+			"Width": 122
+		},
+		{
+			"Class": "Superliner I",
+			"Config": "Coach",
+			"Mass": 148000,
+			"Height": 194,
+			"Width": 122
+		},
+		{
+			"Class": "Surfliner",
+			"Config": "Cafe Coach",
+			"Mass": 153000,
+			"Height": 194,
+			"Width": 122
+		},
+		{
+			"Class": "Surfliner",
+			"Config": "Coach",
+			"Mass": 150000,
+			"Height": 194,
+			"Width": 122
+		},
+		{
+			"Class": "Surfliner",
+			"Config": "Coach",
+			"Mass": 150000,
+			"Height": 194,
+			"Width": 122
+		},
+		{
+			"Class": "Surfliner",
+			"Config": "Coach Baggage Cab",
+			"Mass": 154000,
+			"Height": 194,
+			"Width": 122
+		}
+	]
+}
