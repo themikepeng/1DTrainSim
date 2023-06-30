@@ -156,7 +156,7 @@ Each row corresponds to one stop; stops are ordered consecutively, from one term
 Stops are defined by columns:
 
 *   **arrival stop** = stop name
-*   **track speed (mph)** = practical top speed of preceeding track section (considering terrain, curvature, speed restrictions etc.) 
+*   **track speed (mph)** = practical top speed of track section, between stop and preceeding stop (considering terrain, curvature, speed restrictions etc.) 
 *   **dist (mi)** = distance from preceeding stop
 
 Thus, the .csv must have header format: **arrival stop,track speed (mph),dist (mi)**
@@ -167,13 +167,14 @@ By definition, with the exception of loop routes, the initial stop's **track spe
 
 A **timetable** file has similar format to a **route** file, but with additional columns:
 
-*   **time (min)** = time between arriving previous stop, and arriving current stop (dwell time at previous stop + time to traverse preceeding track section)
+*   **time (min)** = time between arriving previous stop, and arriving current stop (dwell time at previous stop + time to traverse intermediate track section)
 *   **avg spd (mph)** = average speed over **time (min)**
 
-## References
+## References, Notes
 *   Constants, variables, equations, and algorithms are defined and derived in ***derivations.pdf***
 
 *   Performance specs and dimensions for specific rolling stock can be found by searching: technical documents, manufacturer sites, rail enthusiast sites and forums
-    *   **Note:** traction power (hp), to be used for calculations, is typically about 10% lower than official rated horsepower
+    *   **Note:** traction power (hp) used for calculations should be about 10% lower than official rated horsepower
+	*   10% is a typical estimate of drivetrain loss
 
 *   Coefficient of drag can be estimated from train's frontal shape-- typically ranging from conventional (approx 1.0) to high-speed streamlined (approx 0.25)
