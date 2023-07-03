@@ -67,7 +67,7 @@ Refer to ***demo.py*** for a full example flow
 	Can also load consist from .json file (see later section for file format)
 
 	```
-	train = load_train("sample_train_A.json")
+	train = load_train(r"sample_train_A.json")
 	```
 
 ### Train can now perform any of the following
